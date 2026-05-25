@@ -1,6 +1,7 @@
 #ifndef __AIRCRAFT_CTRL_TASK_H__
 #define __AIRCRAFT_CTRL_TASK_H__
-#include "remote_control.h"
+#include "common/mavlink.h"
+#include "mavlink_types.h"
 #include "INS_task.h"
 typedef enum
 {

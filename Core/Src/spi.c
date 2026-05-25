@@ -7,7 +7,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2025 STMicroelectronics.
+  * Copyright (c) 2026 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -149,7 +149,7 @@ void HAL_SPI_MspDeInit(SPI_HandleTypeDef* spiHandle)
 uint8_t SPI1_ReadWriteByte(uint8_t TxData)
 {
     uint8_t Rxdata;
-    test_flag=HAL_SPI_TransmitReceive(&hspi1,&TxData,&Rxdata,1, 1000);       
+    HAL_SPI_TransmitReceive(&hspi1,&TxData,&Rxdata,1, 1000);       
  	return Rxdata;          		   
 }
 /* USER CODE END 1 */

@@ -7,7 +7,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2025 STMicroelectronics.
+  * Copyright (c) 2026 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -63,9 +63,10 @@ void Error_Handler(void);
 #define CS2_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-extern int test_num;
-extern int error_id;
-extern int test_flag;
+#define RC_PROTOCOL_CRSF    0
+#define RC_PROTOCOL_MAVLINK 1
+
+#define CURRENT_RC_PROTOCOL  RC_PROTOCOL_MAVLINK
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

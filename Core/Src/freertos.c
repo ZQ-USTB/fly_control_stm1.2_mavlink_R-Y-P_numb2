@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2025 STMicroelectronics.
+  * Copyright (c) 2026 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -27,12 +27,18 @@
 /* USER CODE BEGIN Includes */
 #include "INS_task.h"
 #include "Aircraft_ctrl_task.h"
+#include "common/mavlink.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
 osThreadId imuTaskHandle;//����IMU���
 osThreadId fly_ctrlTaskHandle;//����IMU���
+#if (CURRENT_RC_PROTOCOL == RC_PROTOCOL_MAVLINK)
+osThreadId mavlinkTaskHandle;
+#else
+
+#endif
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -108,12 +114,19 @@ void MX_FREERTOS_Init(void) {
   defaultTaskHandle = osThreadCreate(osThread(defaultTask), NULL);
 
   /* USER CODE BEGIN RTOS_THREADS */
-	osThreadDef(INS, INS_task, osPriorityHigh, 0, 256);
+  /* add threads, ... */
+  	osThreadDef(INS, INS_task, osPriorityHigh, 0, 256);
   imuTaskHandle = osThreadCreate(osThread(INS), NULL);
 	
 	osThreadDef(FLY_CTRL, Aircraft_ctrl_task, osPriorityNormal, 0, 256);
   fly_ctrlTaskHandle = osThreadCreate(osThread(FLY_CTRL), NULL);
-  /* add threads, ... */
+	
+#if (CURRENT_RC_PROTOCOL == RC_PROTOCOL_MAVLINK)
+   osThreadDef(MAV_LINK, mavlink_task, osPriorityNormal, 0, 256);
+   mavlinkTaskHandle = osThreadCreate(osThread(MAV_LINK), NULL);
+#else
+
+#endif
   /* USER CODE END RTOS_THREADS */
 
 }

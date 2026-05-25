@@ -7,7 +7,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2025 STMicroelectronics.
+  * Copyright (c) 2026 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -41,7 +41,7 @@ extern SPI_HandleTypeDef hspi1;
 void MX_SPI1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-uint8_t SPI1_ReadWriteByte(uint8_t TxData);//����ʵ������
+uint8_t SPI1_ReadWriteByte(uint8_t TxData);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

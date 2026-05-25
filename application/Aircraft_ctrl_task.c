@@ -1,6 +1,5 @@
 #include "Aircraft_ctrl_task.h"
 #include "cmsis_os.h"
-#include "remote_control.h"
 #include "tim.h"
 aircraft_control_t aircraft_control;
 #include "pid.h"
@@ -283,7 +282,7 @@ void aricraft_fly_ctrl(aircraft_control_t*aircraft_fly_ctrl)
      yaw_angle = 1500.0f + YAW*0.5 + yaw_bias+90;
      Limit(&aircraft_control);
 		 WritePWM(&aircraft_control);	
-	   Bias(&aircraft_control);
+	     Bias(&aircraft_control);
 	}
 //////////////////////////////////////////////////////////////////////////////////////////////////	
   else if(aircraft_fly_ctrl->aircraft_behaviour==Aircraft_InRing_R)

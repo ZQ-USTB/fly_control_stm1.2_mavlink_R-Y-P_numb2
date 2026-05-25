@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2025 STMicroelectronics.
+  * Copyright (c) 2026 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -23,7 +23,7 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 /* USER CODE END Includes */
-
+#include "spl06.h"
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN TD */
 
@@ -64,7 +64,7 @@ extern UART_HandleTypeDef huart3;
 extern TIM_HandleTypeDef htim2;
 
 /* USER CODE BEGIN EV */
-
+extern SPL06_t spl06_inst;
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -279,9 +279,9 @@ void USART3_IRQHandler(void)
 
 /* USER CODE BEGIN 1 */
 void HAL_I2C_MemRxCpltCallback(I2C_HandleTypeDef *hi2c) {
-    // ����Ƿ���������ѹ�Ƶ� I2C2
+    // 检查是否是连接气压计的 I2C2
     if (hi2c->Instance == I2C2) {
-//        SPL06_On_IT_Complete(&spl06_inst);
+        SPL06_On_IT_Complete(&spl06_inst);
     }
 }
 /* USER CODE END 1 */
