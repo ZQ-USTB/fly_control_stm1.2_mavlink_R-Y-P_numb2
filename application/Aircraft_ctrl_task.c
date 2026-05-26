@@ -220,7 +220,7 @@ void pid_ctrl(aircraft_control_t*aircraft_fly_ctrl)
 
 void WritePWM(aircraft_control_t*aircraft_fly_ctrl)
 {
-     __HAL_TIM_SetCompare(&htim5, TIM_CHANNEL_3, pitch1_angle);///
+         __HAL_TIM_SetCompare(&htim5, TIM_CHANNEL_3, pitch1_angle);///
 		 __HAL_TIM_SetCompare(&htim5, TIM_CHANNEL_2, roll_angle);///
 		 __HAL_TIM_SetCompare(&htim5, TIM_CHANNEL_4, yaw_angle);///
 }
@@ -335,11 +335,11 @@ void aricraft_fly_ctrl(aircraft_control_t*aircraft_fly_ctrl)
 //////////////////////////////////////////////////////////////////////////////////////////////////	
 	else if(aircraft_fly_ctrl->aircraft_behaviour==Aircraft_RUN)
 	{
-					 servo_value=1000+(int)(aircraft_fly_ctrl->remote_data->Left_Y)*10;
+	  servo_value=1000+(int)(aircraft_fly_ctrl->remote_data->Left_Y)*10;
      __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_3, servo_value);//
      __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_4, servo_value);//
         
-		YAW_angle_Set=YAW_angle_Set+aircraft_fly_ctrl->remote_data->Left_X*0.0003;
+		// YAW_angle_Set=YAW_angle_Set+aircraft_fly_ctrl->remote_data->Left_X*0.0003;
 	
 		if(YAW_angle_Set>180)
 		{
@@ -362,7 +362,7 @@ void aricraft_fly_ctrl(aircraft_control_t*aircraft_fly_ctrl)
         ROLL = PID_calc(&PID_rate_roll, INS_G0, Roll_Rate_Set);
         PITCH = PID_calc(&PID_rate_pitch, INS_G1, Pitch_Rate_Set);
 		
-		    YAW = PID_calc(&PID_rate_yaw, INS_G2, Yaw_Rate_Set);
+	    YAW = PID_calc(&PID_rate_yaw, INS_G2, Yaw_Rate_Set);
 				
         roll_angle = 1500.0f -PITCH + roll_bias;
         pitch1_angle = 1500.0f -ROLL*0.5 + pitch1_bias;  

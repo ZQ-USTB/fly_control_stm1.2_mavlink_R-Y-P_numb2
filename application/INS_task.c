@@ -208,8 +208,8 @@ void attitude_update_madgwick(float* INS_gyro, float* INS_accel)
     g_roll = -g_roll; //  (Algo Y , User X )
 
 // 		imu_data.INS_angle[0]=g_yaw;
-		imu_data.INS_angle[1]=g_pitch-9.5;
-		imu_data.INS_angle[2]=g_roll+6.5;
+		imu_data.INS_angle[1]=g_pitch;
+		imu_data.INS_angle[2]=g_roll;
 }
 const IMU_data_t*get_imu_data_point(void)
 {
