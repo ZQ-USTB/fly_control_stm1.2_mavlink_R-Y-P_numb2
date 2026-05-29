@@ -157,7 +157,7 @@ void Bias(aircraft_control_t* aircraft_fly_ctrl)
 
     if (aircraft_fly_ctrl->remote_data->F == 2)
     {
-        // ֻ׼״̬²ִ߼
+    
         if (bias_trigger_state == 0)
         {
             if (aircraft_fly_ctrl->remote_data->Right_X < -50)
@@ -192,7 +192,7 @@ void Bias(aircraft_control_t* aircraft_fly_ctrl)
         }
     }
   
-    else if (aircraft_fly_ctrl->remote_data->F == 0)
+    else if (aircraft_fly_ctrl->remote_data->F == 1)
     {
         bias_trigger_state = 0; // һ F==2 
     }

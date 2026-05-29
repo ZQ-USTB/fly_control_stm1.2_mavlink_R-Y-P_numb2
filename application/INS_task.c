@@ -41,7 +41,7 @@ static fp32 INS_mag[3] = {0.0f, 0.0f, 0.0f};
 static fp32 INS_quat[4] = {0.0f, 0.0f, 0.0f, 0.0f};
 fp32 INS_angle[3] = {0.0f, 0.0f, 0.0f};
 fp32 angle[3] = {0.0f, 0.0f, 0.0f};
-#define SAMPLE_FREQ 500.0f
+#define SAMPLE_FREQ 1000.0f
 // #define M_PI 3.14159265358979323846f
 volatile float beta = 0.2f;
 volatile float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;
@@ -402,14 +402,16 @@ void IMU_data_init(IMU_data_t *imu_data_init)
 void offset_input(IMU_data_t *imu_data_offset)
 {
 
-	imu_data_offset->accel_offset[0]=484.75;//-301/61.51
-	imu_data_offset->accel_offset[1]=279.4;//-207/-201.32
-	imu_data_offset->accel_offset[2]=-30.6;//-59/-7.411
+	imu_data_offset->accel_offset[0]=-105.3;//-301/61.51
+	imu_data_offset->accel_offset[1]=-27.8;//-207/-201.32
+	imu_data_offset->accel_offset[2]=-2732.2;//-59/-7.411
 
-	imu_data_offset->gyro_offset[0]=1.3;//10.76/-1.531
-	imu_data_offset->gyro_offset[1]=-5.675;//3.83/-0.549
-	imu_data_offset->gyro_offset[2]=2.2;//1.47/-3.509
+	imu_data_offset->gyro_offset[0]=2.8;//10.76/-1.531
+	imu_data_offset->gyro_offset[1]=0.83;//3.83/-0.549
+	imu_data_offset->gyro_offset[2]=0.04;//1.47/-3.509
 }
+
+
 
 void autooffset(IMU_data_t *imu_data_cail)
 {
@@ -434,6 +436,7 @@ void autooffset(IMU_data_t *imu_data_cail)
 	imu_data_cail->gyro_offset[1]/=1000;
 	imu_data_cail->gyro_offset[2]/=1000;
 	imu_data_cail->accel_offset[2]-=5461.3;
+   float a_z_earth_G1=0;
 }
 
 float a_z_earth_G=0;
@@ -446,7 +449,7 @@ void INS_task(void const *pvParameters)
 	  init_bmi08(&bmi08);
 	  SPL06_Init(&spl06_inst, &hi2c2);
 	  IMU_data_init(&imu_data);
-
+      //autooffset(&imu_data);
 	  offset_input(&imu_data);
 	  uint8_t baro_divider = 0;
 
@@ -456,8 +459,8 @@ void INS_task(void const *pvParameters)
     // ====================================================================
     float filter_cutoff_acc =10.0f;
     float filter_cutoff_gyro_x = 10.0f;
- 	  float filter_cutoff_gyro_y = 10.0f;
-	  float filter_cutoff_gyro_z = 10.0f;
+    float filter_cutoff_gyro_y = 10.0f;
+	float filter_cutoff_gyro_z = 10.0f;
 
 
     BiquadFilter_Setup(&gyro_filter[0], SAMPLE_FREQ, filter_cutoff_gyro_x); //  X
@@ -533,9 +536,9 @@ void INS_task(void const *pvParameters)
         imu_data.bmi08_gyro_raw.y = bmi08_gyro.y;
         imu_data.bmi08_gyro_raw.z = bmi08_gyro.z;
 
-        float raw_gx = lsb_to_dps((int16_t)(bmi08_gyro.x - imu_data.gyro_offset[0]), 1000.0f, 16);
-        float raw_gy = lsb_to_dps((int16_t)(bmi08_gyro.y - imu_data.gyro_offset[1]), 1000.0f, 16);
-        float raw_gz = lsb_to_dps((int16_t)(bmi08_gyro.z - imu_data.gyro_offset[2]), 1000.0f, 16);
+        float raw_gx = lsb_to_dps((int16_t)(bmi08_gyro.x - imu_data.gyro_offset[0]), 2000.0f, 16);
+        float raw_gy = lsb_to_dps((int16_t)(bmi08_gyro.y - imu_data.gyro_offset[1]), 2000.0f, 16);
+        float raw_gz = lsb_to_dps((int16_t)(bmi08_gyro.z - imu_data.gyro_offset[2]), 2000.0f, 16);
 
 
         INS_gyro[0] = BiquadFilter_Apply(&gyro_filter[0], raw_gx);

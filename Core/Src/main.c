@@ -6,7 +6,7 @@
   ******************************************************************************
   * @attention
   *
-  * Copyright (c) 2026 STMicroelectronics.
+  * Copyright (c) 2025 STMicroelectronics.
   * All rights reserved.
   *
   * This software is licensed under terms that can be found in the LICENSE file
@@ -22,16 +22,17 @@
 #include "dma.h"
 #include "i2c.h"
 #include "spi.h"
-#include "stm32h7xx_hal.h"
 #include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "spl06.h"
-#include "common/mavlink.h"
+#include <math.h>
+#include "bmi088_mm.h"
 #include "common.h"
+#include "string.h"
+#include "common/mavlink.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -60,12 +61,22 @@ void SystemClock_Config(void);
 static void MPU_Config(void);
 void MX_FREERTOS_Init(void);
 /* USER CODE BEGIN PFP */
-
+void HAL_Delay_us_init(uint16_t SYSCLK);
 /* USER CODE END PFP */
 
 /* Private user code ---------------------------------------------------------*/
 /* USER CODE BEGIN 0 */
-int test_add=0;
+
+int test_num=0;//观察程序循环运行状态
+int error_id=0;//代替printf，寻找错误位置
+int test_flag=5;//代替init中的rslt
+int test_pwm=0;
+int pwm_flag=0;
+int tim_5_1_test=0;
+int tim_5_2_test=0;
+int tim_5_3_test=0;
+int tim_5_4_test=1500;
+
 /* USER CODE END 0 */
 
 /**
@@ -76,6 +87,7 @@ int main(void)
 {
 
   /* USER CODE BEGIN 1 */
+ 
 
   /* USER CODE END 1 */
 
@@ -95,12 +107,12 @@ int main(void)
   SystemClock_Config();
 
   /* USER CODE BEGIN SysInit */
-  HAL_Delay_us_init(480);//给IMU用的延时
+   HAL_Delay_us_init(480);//给IMU用的延时
+   HAL_Delay(3000);
   /* USER CODE END SysInit */
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  HAL_Delay(2000);
   MX_DMA_Init();
   MX_TIM5_Init();
   MX_SPI1_Init();
@@ -108,19 +120,23 @@ int main(void)
   MX_TIM3_Init();
   MX_I2C2_Init();
   /* USER CODE BEGIN 2 */
-  Mavlink_Init();//初始化串口DMA以及环形缓冲区
-  HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_1);
-	HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_2);
-	HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_3);
-	HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_4);
-	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
-	HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4);
-  __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_3, 1000);
-	__HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_4, 1000);
-   
-  __HAL_TIM_SetCompare(&htim5, TIM_CHANNEL_2, 1500);//初始舵机角度
-  __HAL_TIM_SetCompare(&htim5, TIM_CHANNEL_3, 1500);
-  __HAL_TIM_SetCompare(&htim5, TIM_CHANNEL_4, 1500);
+ 	Mavlink_Init();
+	 
+   HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_1);
+	 HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_2);
+	 HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_3);
+	 HAL_TIM_PWM_Start(&htim5, TIM_CHANNEL_4);
+	 HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_3);
+	 HAL_TIM_PWM_Start(&htim3, TIM_CHANNEL_4);
+	 HAL_GPIO_WritePin(GPIOE,GPIO_PIN_9,GPIO_PIN_RESET);
+//   __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_3, test_pwm);
+//	 __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_4, test_pwm);
+
+   __HAL_TIM_SetCompare(&htim5, TIM_CHANNEL_2, 1500);//初始舵机角度
+	 __HAL_TIM_SetCompare(&htim5, TIM_CHANNEL_3, 1500);
+	 __HAL_TIM_SetCompare(&htim5, TIM_CHANNEL_4, 1500);
+	 	/* Initialize the sensors */
+
   /* USER CODE END 2 */
 
   /* Call init function for freertos objects (in cmsis_os2.c) */
@@ -138,8 +154,12 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
- 
-    HAL_Delay(100);
+//   __HAL_TIM_SetCompare(&htim5, TIM_CHANNEL_1, tim_5_1_test);
+//	 __HAL_TIM_SetCompare(&htim5, TIM_CHANNEL_2, tim_5_2_test);
+//	 __HAL_TIM_SetCompare(&htim5, TIM_CHANNEL_3, test_pwm);
+//	 __HAL_TIM_SetCompare(&htim5, TIM_CHANNEL_4, tim_5_4_test);
+		
+    		HAL_Delay(100);
   }
   /* USER CODE END 3 */
 }
@@ -204,6 +224,8 @@ void SystemClock_Config(void)
 }
 
 /* USER CODE BEGIN 4 */
+/* USER CODE BEGIN 4 */
+
 
 /* USER CODE END 4 */
 
