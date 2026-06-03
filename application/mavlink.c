@@ -2,11 +2,15 @@
 #include "mavlink_types.h"
 #include "usart.h"
 #include "ringbuffer.h"//环形缓冲区头文件
+#include <math.h>
 #include "stdio.h"
 #define  MAVLINK_READ_BUFFER_SIZE 128
 #include "cmsis_os.h"
 #include "string.h"
 //#include "mavlink_msg_rc_channels.h"
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 /*缓冲区管理器*/
 //ringbuffer管理变量
 RingBuffer  m_Mavlink_RX_RingBuffMgr;
@@ -42,6 +46,12 @@ const PC_Data_t *get_pc_data_point(void)
 {
     return &pc_data;
 }
+
+void PC_Data_Clear(void)
+{
+    memset(&pc_data, 0, sizeof(pc_data));
+}
+
 
 float float_Map(float input_value, float input_min, float input_max, float output_min, float output_max)
 {

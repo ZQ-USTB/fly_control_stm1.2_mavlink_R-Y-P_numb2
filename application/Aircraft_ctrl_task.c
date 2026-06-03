@@ -16,21 +16,21 @@ pid_type_def PID_rate_roll;// ROLLٶȻ
 
 int32_t servo_value=0;
 float pitch1_angle,yaw_angle,roll_angle,PITCH,ROLL,YAW = 0.0f;
-float pitch1_bias,yaw_bias,roll_bias=0;
+float pitch1_bias=-90,yaw_bias=90,roll_bias=180;
 
 fp32 PID_R[3] = {8.0f, 0.0f, 0.0f};
-fp32 PID_P1[3] = {6.0f, 0.0f, 0.0f};
-fp32 PID_P2[3] = {5.0f, 0.0f, 0.0f};
+fp32 PID_P1[3] = {8.0f, 0.0f, 0.0f};
+fp32 PID_P2[3] = {2.0f, 0.0f, 0.0f};
 
-fp32 PID_Rate_Roll[3] = {4.5f, 0.0f, 0.0f}; 
-fp32 PID_Rate_Pitch[3] = {3.5f, 0.0f, 0.0f}; 
+fp32 PID_Rate_Roll[3] = {3.5f, 0.0f, 0.0f}; 
+fp32 PID_Rate_Pitch[3] = {3.0f, 0.0f, 0.0f}; 
 
 float PID_P=1.6;
-float Pitch_Rate_Kp = 3.5f; 
-float Pitch_Angle_Kp = 6.0f; 
-float Roll_Rate_Kp = 4.5f; 
+float Pitch_Rate_Kp = 3.0f; 
+float Pitch_Angle_Kp = 8.0f; 
+float Roll_Rate_Kp = 3.5f; 
 float Roll_Angle_Kp = 8.0f;  
-float YAW_Kp = 5.0f;
+float YAW_Kp = 2.0f;
 float Roll_Rate_Set=0;
 float Pitch_Rate_Set=0;
 float YAW_angle_Set=0;
@@ -39,8 +39,8 @@ float INS_G1=0;
 
 pid_type_def PID_rate_yaw;    
 
-fp32 PID_Rate_Yaw[3] = {5.0f, 0.0f, 0.0f}; 
-float Yaw_Rate_Kp = 5.0f;      
+fp32 PID_Rate_Yaw[3] = {2.0f, 0.0f, 0.0f}; 
+float Yaw_Rate_Kp = 2.0f;      
 float Yaw_Rate_Set = 0;          
 float INS_G2 = 0;               
 
@@ -82,6 +82,7 @@ void aircraft_init(aircraft_control_t*init)
 	init->last_aircraft_behaviour=Aircraft_ZERO_FORCE;
 	init->remote_data=get_remote_control_point();
 	init->IMU_data=get_imu_data_point();
+  init->pc_data=get_pc_data_point();
 	/*
 	IMUָȡ
 	*/
@@ -105,11 +106,14 @@ void aricraft_behaviour_mode_set(aircraft_control_t*aircraft_mode_set)
     aircraft_mode_set->aircraft_behaviour = Aircraft_Y;
  }else if(aircraft_mode_set->remote_data->B==1 && aircraft_mode_set->remote_data->C==1) {
     aircraft_mode_set->aircraft_behaviour = Aircraft_InRing_Y;
+ } else if(aircraft_mode_set->remote_data->B==2 && aircraft_mode_set->remote_data->C==1) {
+    aircraft_mode_set->aircraft_behaviour = Aircraft_AUTO;
  } else {
     aircraft_mode_set->aircraft_behaviour = Aircraft_ZERO_FORCE;
  }
 
- if(aircraft_mode_set->aircraft_behaviour==Aircraft_RUN&&aircraft_mode_set->last_aircraft_behaviour==Aircraft_ZERO_FORCE)
+ if(aircraft_mode_set->aircraft_behaviour==Aircraft_RUN||aircraft_mode_set->last_aircraft_behaviour==Aircraft_ZERO_FORCE
+    ||aircraft_mode_set->last_aircraft_behaviour==Aircraft_AUTO)
  {
 	 YAW_angle_Set=aircraft_mode_set->IMU_data->INS_angle[0];
  }
@@ -233,7 +237,7 @@ void aricraft_fly_ctrl(aircraft_control_t*aircraft_fly_ctrl)
 		__HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_4, 1000);//ͣת	
 	 __HAL_TIM_SetCompare(&htim5, TIM_CHANNEL_3, 1500+ pitch1_bias);//ʼǶ
 	 __HAL_TIM_SetCompare(&htim5, TIM_CHANNEL_2, 1500+ roll_bias);
-	 __HAL_TIM_SetCompare(&htim5, TIM_CHANNEL_4, 1500+ yaw_bias+90);
+	 __HAL_TIM_SetCompare(&htim5, TIM_CHANNEL_4, 1500+ yaw_bias);
 	}
 	//////////////////////////////////////////////////////////////////////////////////////////////////YAW-inring
 	else if(aircraft_fly_ctrl->aircraft_behaviour==Aircraft_InRing_Y)
@@ -245,7 +249,11 @@ void aricraft_fly_ctrl(aircraft_control_t*aircraft_fly_ctrl)
     PID_rate_yaw.Kp = YAW_Kp;
 	}
       YAW = PID_calc(&PID_rate_yaw, INS_G2, 0);
-     yaw_angle = 1500.0f + YAW*0.5 + yaw_bias+90;
+       ROLL = PID_calc(&PID_rate_roll, aircraft_fly_ctrl->IMU_data->INS_gyro[0], 0);
+     PITCH = PID_calc(&PID_rate_pitch, aircraft_fly_ctrl->IMU_data->INS_gyro[1], 0);
+		 roll_angle = 1500.0f -PITCH + roll_bias;
+     pitch1_angle = 1500.0f - ROLL*0.5 + pitch1_bias;
+     yaw_angle = 1500.0f + YAW*0.5 + yaw_bias;
      Limit(&aircraft_control);
 		 WritePWM(&aircraft_control);	
 	   Bias(&aircraft_control);
@@ -260,7 +268,11 @@ void aricraft_fly_ctrl(aircraft_control_t*aircraft_fly_ctrl)
     PID_control_yaw.Kp = YAW_Kp;
 	}
      YAW=yaw_PID_calc(&PID_control_yaw, aircraft_fly_ctrl->IMU_data->INS_angle[0], YAW_angle_Set);
-     yaw_angle = 1500.0f + YAW*0.5 + yaw_bias+90;
+      ROLL = PID_calc(&PID_rate_roll, aircraft_fly_ctrl->IMU_data->INS_gyro[0], 0);
+     PITCH = PID_calc(&PID_rate_pitch, aircraft_fly_ctrl->IMU_data->INS_gyro[1], 0);
+		 roll_angle = 1500.0f -PITCH + roll_bias;
+     pitch1_angle = 1500.0f - ROLL*0.5 + pitch1_bias;  
+     yaw_angle = 1500.0f + YAW*0.5 + yaw_bias;
      Limit(&aircraft_control);
 		 WritePWM(&aircraft_control);	
 	   Bias(&aircraft_control);
@@ -279,7 +291,7 @@ void aricraft_fly_ctrl(aircraft_control_t*aircraft_fly_ctrl)
      PITCH = PID_calc(&PID_rate_pitch, aircraft_fly_ctrl->IMU_data->INS_gyro[1], 0);
 		 roll_angle = 1500.0f -PITCH + roll_bias;
      pitch1_angle = 1500.0f - ROLL*0.5 + pitch1_bias;  
-     yaw_angle = 1500.0f + YAW*0.5 + yaw_bias+90;
+     yaw_angle = 1500.0f + YAW*0.5 + yaw_bias;
      Limit(&aircraft_control);
 		 WritePWM(&aircraft_control);	
 	     Bias(&aircraft_control);
@@ -299,7 +311,7 @@ void aricraft_fly_ctrl(aircraft_control_t*aircraft_fly_ctrl)
      PITCH = PID_calc(&PID_rate_pitch, aircraft_fly_ctrl->IMU_data->INS_gyro[1], 0);
 		 roll_angle = 1500.0f -PITCH + roll_bias;
      pitch1_angle = 1500.0f - ROLL*0.5 + pitch1_bias;  
-     yaw_angle = 1500.0f + YAW*0.5 + yaw_bias+90;
+     yaw_angle = 1500.0f + YAW*0.5 + yaw_bias;
      Limit(&aircraft_control);
 		 WritePWM(&aircraft_control);	
 	   Bias(&aircraft_control);
@@ -366,13 +378,41 @@ void aricraft_fly_ctrl(aircraft_control_t*aircraft_fly_ctrl)
 				
         roll_angle = 1500.0f -PITCH + roll_bias;
         pitch1_angle = 1500.0f -ROLL*0.5 + pitch1_bias;  
-        yaw_angle = 1500.0f +YAW*0.5 + yaw_bias+90;
+        yaw_angle = 1500.0f +YAW*0.5 + yaw_bias;
 		
 //		    roll_angle = 1500.0f + roll_bias;
 //        pitch1_angle = 1500.0f  + pitch1_bias;  
 //        yaw_angle = 1500.0f +YAW*0.5 + yaw_bias;
 		 // yaw_angle = 1500.0f + yaw_bias;
-     Limit(&aircraft_control);
+         Limit(&aircraft_control);
+		 WritePWM(&aircraft_control);	
+	}
+	//////////////////////////////////////////////////////////////////////////////////////////////////AUTO
+	else if(aircraft_fly_ctrl->aircraft_behaviour==Aircraft_AUTO)
+	{
+	   servo_value=1000+(int)(aircraft_fly_ctrl->pc_data->thrust*1000.0f);
+     __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_3, servo_value);
+     __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_4, servo_value);
+        
+        Roll_Rate_Set = PID_calc(&PID_control_roll, aircraft_fly_ctrl->IMU_data->INS_angle[2], aircraft_fly_ctrl->pc_data->roll);
+        Pitch_Rate_Set = PID_calc(&PID_control_pitch, aircraft_fly_ctrl->IMU_data->INS_angle[1], aircraft_fly_ctrl->pc_data->pitch);
+        Yaw_Rate_Set = yaw_PID_calc(&PID_control_yaw, aircraft_fly_ctrl->IMU_data->INS_angle[0], aircraft_fly_ctrl->pc_data->yaw);
+		
+		
+		    INS_G0=lowPass(aircraft_fly_ctrl->IMU_data->INS_gyro[0],INS_G0, 1);
+		    INS_G1=lowPass(aircraft_fly_ctrl->IMU_data->INS_gyro[1],INS_G1, 1);
+	    	INS_G2=lowPass(aircraft_fly_ctrl->IMU_data->INS_gyro[2],INS_G2, 1); // --- Yawٶ˲ ---
+
+        ROLL = PID_calc(&PID_rate_roll, INS_G0, Roll_Rate_Set);
+        PITCH = PID_calc(&PID_rate_pitch, INS_G1, Pitch_Rate_Set);
+		
+	    YAW = PID_calc(&PID_rate_yaw, INS_G2, Yaw_Rate_Set);
+				
+        roll_angle = 1500.0f -PITCH + roll_bias;
+        pitch1_angle = 1500.0f -ROLL*0.5 + pitch1_bias;  
+        yaw_angle = 1500.0f +YAW*0.5 + yaw_bias;
+		
+         Limit(&aircraft_control);
 		 WritePWM(&aircraft_control);	
 	}
 }

@@ -14,13 +14,15 @@ typedef enum
   Aircraft_Y,
 	Aircraft_InRing_Y,
 
-  Aircraft_RUN,        
+  Aircraft_RUN,    
+  Aircraft_AUTO,    
 } aircraft_behaviour_e;
 
 typedef struct
 {
 	const ELRS_Data *remote_data;
 	const IMU_data_t *IMU_data;
+  const PC_Data_t *pc_data;
 	aircraft_behaviour_e aircraft_behaviour; 
   aircraft_behaviour_e last_aircraft_behaviour; 
 
