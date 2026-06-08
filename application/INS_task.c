@@ -43,7 +43,7 @@ fp32 INS_angle[3] = {0.0f, 0.0f, 0.0f};
 fp32 angle[3] = {0.0f, 0.0f, 0.0f};
 #define SAMPLE_FREQ 1000.0f
 // #define M_PI 3.14159265358979323846f
-volatile float beta = 0.2f;
+volatile float beta = 0.8f;
 volatile float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;
  float g_roll = 0.0f;  //  (X, )
  float g_pitch = 0.0f;
@@ -457,10 +457,10 @@ void INS_task(void const *pvParameters)
 
 
     // ====================================================================
-    float filter_cutoff_acc =10.0f;
-    float filter_cutoff_gyro_x = 10.0f;
-    float filter_cutoff_gyro_y = 10.0f;
-	float filter_cutoff_gyro_z = 10.0f;
+    float filter_cutoff_acc =3.0f;
+    float filter_cutoff_gyro_x = 3.0f;
+    float filter_cutoff_gyro_y = 3.0f;
+	float filter_cutoff_gyro_z = 3.0f;
 
 
     BiquadFilter_Setup(&gyro_filter[0], SAMPLE_FREQ, filter_cutoff_gyro_x); //  X
@@ -484,8 +484,6 @@ void INS_task(void const *pvParameters)
             if (spl06_inst.data_ready) {
 
                 SPL06_Process_Data(&spl06_inst);
-
-
 
                 // imu_data.baro_alt = spl06_inst.altitude;
                 // imu_data.baro_pressure = spl06_inst.pressure;

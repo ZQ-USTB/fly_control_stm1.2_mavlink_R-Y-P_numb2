@@ -135,6 +135,7 @@ int main(void)
    __HAL_TIM_SetCompare(&htim5, TIM_CHANNEL_2, 1500);//初始舵机角度
 	 __HAL_TIM_SetCompare(&htim5, TIM_CHANNEL_3, 1500);
 	 __HAL_TIM_SetCompare(&htim5, TIM_CHANNEL_4, 1500);
+   //HAL_GPIO_WritePin(GPIOE,GPIO_PIN_9,GPIO_PIN_SET);
 	 	/* Initialize the sensors */
 
   /* USER CODE END 2 */

@@ -112,8 +112,8 @@ void aricraft_behaviour_mode_set(aircraft_control_t*aircraft_mode_set)
     aircraft_mode_set->aircraft_behaviour = Aircraft_ZERO_FORCE;
  }
 
- if(aircraft_mode_set->aircraft_behaviour==Aircraft_RUN||aircraft_mode_set->last_aircraft_behaviour==Aircraft_ZERO_FORCE
-    ||aircraft_mode_set->last_aircraft_behaviour==Aircraft_AUTO)
+ if(aircraft_mode_set->aircraft_behaviour == Aircraft_RUN &&
+        aircraft_mode_set->last_aircraft_behaviour != Aircraft_RUN)
  {
 	 YAW_angle_Set=aircraft_mode_set->IMU_data->INS_angle[0];
  }
@@ -394,10 +394,12 @@ void aricraft_fly_ctrl(aircraft_control_t*aircraft_fly_ctrl)
      __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_3, servo_value);
      __HAL_TIM_SetCompare(&htim3, TIM_CHANNEL_4, servo_value);
         
-        Roll_Rate_Set = PID_calc(&PID_control_roll, aircraft_fly_ctrl->IMU_data->INS_angle[2], aircraft_fly_ctrl->pc_data->roll);
-        Pitch_Rate_Set = PID_calc(&PID_control_pitch, aircraft_fly_ctrl->IMU_data->INS_angle[1], aircraft_fly_ctrl->pc_data->pitch);
-        Yaw_Rate_Set = yaw_PID_calc(&PID_control_yaw, aircraft_fly_ctrl->IMU_data->INS_angle[0], aircraft_fly_ctrl->pc_data->yaw);
-		
+        // Roll_Rate_Set = PID_calc(&PID_control_roll, aircraft_fly_ctrl->IMU_data->INS_angle[2], aircraft_fly_ctrl->pc_data->roll);
+        // Pitch_Rate_Set = PID_calc(&PID_control_pitch, aircraft_fly_ctrl->IMU_data->INS_angle[1], aircraft_fly_ctrl->pc_data->pitch);
+        // Yaw_Rate_Set = yaw_PID_calc(&PID_control_yaw, aircraft_fly_ctrl->IMU_data->INS_angle[0], aircraft_fly_ctrl->pc_data->yaw);
+	    Roll_Rate_Set = PID_calc(&PID_control_roll, aircraft_fly_ctrl->IMU_data->INS_angle[2], aircraft_fly_ctrl->remote_data->Right_X*0.3);
+        Pitch_Rate_Set = PID_calc(&PID_control_pitch, aircraft_fly_ctrl->IMU_data->INS_angle[1], aircraft_fly_ctrl->remote_data->Right_Y*0.3);
+        Yaw_Rate_Set = yaw_PID_calc(&PID_control_yaw, aircraft_fly_ctrl->IMU_data->INS_angle[0], YAW_angle_Set+aircraft_fly_ctrl->remote_data->Left_X*0.3);
 		
 		    INS_G0=lowPass(aircraft_fly_ctrl->IMU_data->INS_gyro[0],INS_G0, 1);
 		    INS_G1=lowPass(aircraft_fly_ctrl->IMU_data->INS_gyro[1],INS_G1, 1);

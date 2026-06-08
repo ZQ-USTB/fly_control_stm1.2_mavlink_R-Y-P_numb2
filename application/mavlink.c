@@ -23,6 +23,8 @@ mavlink_message_t lastmsg;
 ELRS_Data elrs_data;
 PC_Data_t pc_data;
 
+int count=0;
+
 /**
   * @brief          get remote control data point
   * @param[in]      none
@@ -283,8 +285,11 @@ void Mavlink_Msg_Handle(mavlink_message_t msg)
 		//printf("this is heartbeat from QGC/r/n");
 		break;
 	case MAVLINK_MSG_ID_SET_ATTITUDE_TARGET:
+
         mavlink_msg_set_attitude_target_decode(&msg, &packet2);//解析数据
         Quaternion_to_Euler_Transform(&packet2,&pc_data);//处理传入数据
+                HAL_GPIO_WritePin(GPIOE,GPIO_PIN_9,GPIO_PIN_SET);
+        // count++;
 		break;
 	case MAVLINK_MSG_ID_RC_CHANNELS_OVERRIDE:
 	{
@@ -406,11 +411,17 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *huart)
 }
 void mavlink_task(void const *pvParameters)
 {
-	
+	int i =0;
 	 while (1)
     {
+      
       Loop_Mavlink_Parse();
-	  mavlink_test_heartbeat2(1,1,&lastmsg);
+      if(i==100)
+		{
+	    mavlink_test_heartbeat2(1,1,&lastmsg);
+        i=0;
+        }
+        i++;
 	  vTaskDelay(10);
 	}
 }
